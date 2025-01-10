@@ -186,8 +186,9 @@ class HostService {
     }
     
     private func handleCreatePageRequest(_ request: CreatePageRequest, on connection: NWConnection) {
-        let page = createPage(page: request.page)
-        if let message = Message.encodeMessage(type: .pageUpdated, payload: page) {
+        let success = createPage(page: request.page)
+        let pageUpdatedResponse = PageUpdatedResponse(pageID: request.page.id, success: success, message: "")
+        if let message = Message.encodeMessage(type: .pageUpdated, payload: pageUpdatedResponse) {
             send(message, on: connection)
         }
     }
