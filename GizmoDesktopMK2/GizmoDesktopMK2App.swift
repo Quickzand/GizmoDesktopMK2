@@ -9,11 +9,11 @@ import SwiftUI
 
 @main
 struct GizmoDesktopMK2App: App {
-    @StateObject private var appState = AppState()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     
     var body: some Scene {
-        WindowGroup {
-            ContentView().environmentObject(appState)
-        }
+        Settings {
+               EmptyView()
+           }
     }
 }

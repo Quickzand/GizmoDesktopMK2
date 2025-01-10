@@ -19,6 +19,12 @@ struct UserData : Codable{
         }
     }
     
+    var rememberedApps : [AppInfoModel] = [] {
+        didSet {
+            save()
+        }
+    }
+    
     // Save settings to UserDefaults
     func save() {
         if let encoded = try? JSONEncoder().encode(self) {
@@ -31,10 +37,10 @@ struct UserData : Codable{
         if let savedData = UserDefaults.standard.data(forKey: "userData"),
            let decoded = try? JSONDecoder().decode(UserData.self, from: savedData) {
             var loadedData = decoded
-            if loadedData.pages.isEmpty || loadedData.pages.count < 2{
+            if loadedData.pages.isEmpty {
                 loadedData.pages.append(PageModel())
             }
-            print("Loaded user data " + String(describing: loadedData))
+//            print("Loaded user data " + String(describing: loadedData))
             return loadedData
         }
         return UserData() // Return default settings if none are saved

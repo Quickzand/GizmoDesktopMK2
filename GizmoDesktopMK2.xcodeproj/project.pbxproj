@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		340D5C6B2CDD970000F8A710 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 340D5C6A2CDD970000F8A710 /* UserData.swift */; };
 		34AD65092CDE716500FD37D4 /* KeyboardSimulations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AD65082CDE716500FD37D4 /* KeyboardSimulations.swift */; };
 /* End PBXBuildFile section */
 
@@ -32,7 +31,6 @@
 		340D5BFE2CDD1C1B00F8A710 /* GizmoDesktopMK2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GizmoDesktopMK2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		340D5C0F2CDD1C1C00F8A710 /* GizmoDesktopMK2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GizmoDesktopMK2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		340D5C192CDD1C1C00F8A710 /* GizmoDesktopMK2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GizmoDesktopMK2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		340D5C6A2CDD970000F8A710 /* UserData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = UserData.swift; path = GizmoDesktopMK2/UserData.swift; sourceTree = "<group>"; };
 		34AD65082CDE716500FD37D4 /* KeyboardSimulations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeyboardSimulations.swift; path = GizmoDesktopMK2/KeyboardSimulations.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -96,7 +94,6 @@
 			isa = PBXGroup;
 			children = (
 				34AD65082CDE716500FD37D4 /* KeyboardSimulations.swift */,
-				340D5C6A2CDD970000F8A710 /* UserData.swift */,
 				340D5C002CDD1C1B00F8A710 /* GizmoDesktopMK2 */,
 				340D5C122CDD1C1C00F8A710 /* GizmoDesktopMK2Tests */,
 				340D5C1C2CDD1C1C00F8A710 /* GizmoDesktopMK2UITests */,
@@ -259,7 +256,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				34AD65092CDE716500FD37D4 /* KeyboardSimulations.swift in Sources */,
-				340D5C6B2CDD970000F8A710 /* UserData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -426,6 +422,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GizmoDesktopMK2/Info.plist;
+				INFOPLIST_KEY_LSBackgroundOnly = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Please 2";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = Please;
@@ -456,6 +453,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = GizmoDesktopMK2/Info.plist;
+				INFOPLIST_KEY_LSBackgroundOnly = YES;
 				INFOPLIST_KEY_NSAppleEventsUsageDescription = "Please 2";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = Please;

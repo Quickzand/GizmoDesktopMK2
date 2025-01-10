@@ -9,7 +9,7 @@ import Network
 
 class HostService {
     private var listener: NWListener?
-    private var connections: [NWConnection] = []
+    public var connections: [NWConnection] = []
     
     // Add this property to hold MessageReceivers for each connection
     private var messageReceivers: [ObjectIdentifier: MessageReceiver] = [:]
@@ -143,6 +143,30 @@ class HostService {
                 if let request = message.decodePayload(as: SwapExecutorRequest.self) {
                     handleSwapExecutor(request, on: connection)
                 }
+            case .listApps:
+                if let request = message.decodePayload(as: ListAppsRequest.self) {
+                    handleListAppsRequest(request, on: connection)
+                }
+            case .createPage:
+                if let request = message.decodePayload(as: CreatePageRequest.self) {
+                    handleCreatePageRequest(request, on: connection)
+                }
+            case .modifyPage:
+                if let request = message.decodePayload(as: ModifyPageRequest.self) {
+                    handleModifyPageRequest(request, on: connection)
+                }
+            case .deletePage:
+                if let request = message.decodePayload(as: DeletePageRequest.self) {
+                    handleDeletePageRequest(request, on: connection)
+                }
+            case .updateAppInfo:
+                if let request = message.decodePayload(as: UpdateAppInfoRequest.self) {
+                    handleUpdateAppInfoRequest(request, on:connection)
+                }
+            case .executeShortcut:
+                if let request = message.decodePayload(as: ExecuteShortcutRequest.self) {
+                    handleExecuteShortcutRequest(request, on:connection)
+                }
             default:
                 sendError(message: "Unsupported message type", on: connection)
             }
@@ -157,6 +181,38 @@ class HostService {
     private func handleListPagesRequest(on connection: NWConnection) {
         let pagesList = PagesListResponse(pages: fetchPages())
         if let message = Message.encodeMessage(type: .pagesList, payload: pagesList) {
+            send(message, on: connection)
+        }
+    }
+    
+    private func handleCreatePageRequest(_ request: CreatePageRequest, on connection: NWConnection) {
+        let page = createPage(page: request.page)
+        if let message = Message.encodeMessage(type: .pageUpdated, payload: page) {
+            send(message, on: connection)
+        }
+    }
+    
+    private func handleModifyPageRequest(_ request: ModifyPageRequest, on connection: NWConnection) {
+        let success = modifyPage(page: request.page)
+        let pageUpdatedResponse = PageUpdatedResponse(pageID: request.page.id, success: success, message: "")
+        if let message = Message.encodeMessage(type: .pageUpdated, payload: pageUpdatedResponse) {
+            send(message, on: connection)
+        }
+    }
+    
+    private func handleUpdateAppInfoRequest(_ request: UpdateAppInfoRequest, on connection: NWConnection) {
+        if let appIndex = self.userData.rememberedApps.firstIndex(where: { $0.bundleID == request.appInfo.bundleID }) {
+            self.userData.rememberedApps[appIndex] = request.appInfo
+            print("updated info to \(request.appInfo)")
+        }
+        else {
+            
+        }
+    }
+    
+    private func handleDeletePageRequest(_ request: DeletePageRequest, on connection: NWConnection) {
+        let page = deletePage(withID: request.pageID)
+        if let message = Message.encodeMessage(type: .pageUpdated, payload: page) {
             send(message, on: connection)
         }
     }
@@ -243,6 +299,18 @@ class HostService {
         }
     }
     
+    private func handleListAppsRequest(_ request: ListAppsRequest, on connection: NWConnection) {
+        updateAllInstalledApplications()
+        let response = AppsListResponse(appInfos: userData.rememberedApps)
+        if let message = Message.encodeMessage(type: .appsList, payload: response) {
+            send(message, on: connection)
+        }
+    }
+    
+    private func handleExecuteShortcutRequest(_ request: ExecuteShortcutRequest, on connection: NWConnection) {
+        runShortcut(named: request.shortcut)
+    }
+    
     // Send a Message to the connection
     func send(_ message: Message, on connection: NWConnection) {
         do {
@@ -291,6 +359,8 @@ class HostService {
             runKeybindAction(action)
         case .siriShortcut:
             runShortcutAction(action)
+        case .core:
+            print(action)
         }
         
         return true
@@ -299,6 +369,29 @@ class HostService {
     private func createAction(action: ActionModel) -> Bool {
         userData.actions.append(action)
         return true
+    }
+    
+    private func createPage(page : PageModel) -> Bool {
+        userData.pages.append(page)
+        return true
+    }
+    
+    private func modifyPage(page: PageModel) -> Bool {
+        for pageIndex in userData.pages.indices {
+            if userData.pages[pageIndex].id == page.id {
+                userData.pages[pageIndex] = page
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func deletePage(withID id: String) -> Bool {
+        if let index = userData.pages.firstIndex(where: {$0.id == id}) {
+            userData.pages.remove(at: index)
+            return true
+        }
+        return false
     }
     
     private func createExecutor(executor: ExecutorModel, pageID: String) -> Bool {
@@ -372,6 +465,15 @@ class HostService {
         // If executor not found, return false
         return false
     }
+    
+    public func focusedAppUpdated( appInfo : AppInfoModel ) {
+        let updateFocusRequest = FocusedAppUpdateRequest(appInfo: appInfo)
+        for connection in connections {
+            if let message = Message.encodeMessage(type: .focusedAppUpdated, payload: updateFocusRequest) {
+                send(message, on: connection)
+            }
+        }
+    }
 
     private func removeConnection(_ connection: NWConnection) {
         if let index = connections.firstIndex(where: { $0 === connection }) {
@@ -382,5 +484,53 @@ class HostService {
         connection.cancel()
     }
     
+    func updateAllInstalledApplications() {
+        let fileManager = FileManager.default
+
+        // Common directories where applications are installed
+        let applicationDirectories = [
+            "/Applications",
+            "/System/Applications",
+            "/System/Library/CoreServices",
+            "\(NSHomeDirectory())/Applications"
+        ]
+
+        for directoryPath in applicationDirectories {
+            let directoryURL = URL(fileURLWithPath: directoryPath, isDirectory: true)
+            if let enumerator = fileManager.enumerator(
+                at: directoryURL,
+                includingPropertiesForKeys: [.isDirectoryKey],
+                options: [.skipsHiddenFiles]
+            ) {
+                for case let fileURL as URL in enumerator {
+                    do {
+                        let resourceValues = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
+                        if resourceValues.isDirectory == true && fileURL.pathExtension == "app" {
+                            // Access the app's bundle
+                            if let bundle = Bundle(url: fileURL) {
+                                let appName = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Unknown"
+                                let bundleID = bundle.bundleIdentifier ?? "Unknown"
+                                if let appIndex = self.userData.rememberedApps.firstIndex(where: { $0.bundleID == bundleID}) {
+                                    
+                                }
+                                else {
+                                    let appInfo = AppInfoModel(name: appName, bundleID: bundleID)
+                                    userData.rememberedApps.append(appInfo)
+                                }
+                            }
+                            // Skip subdirectories within the app bundle
+                            enumerator.skipDescendants()
+                        }
+                    } catch {
+                        print("Error accessing \(fileURL.path): \(error)")
+                    }
+                }
+            }
+        }
+    }
+
+    
 
 }
+
+
