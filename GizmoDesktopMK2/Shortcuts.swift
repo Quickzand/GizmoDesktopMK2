@@ -28,6 +28,7 @@ func fetchShortcuts() -> [String] {
 }
 
 func runShortcut(named name: String) {
+    print("Running shortcut named:", name)
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.arguments = ["shortcuts", "run", name]

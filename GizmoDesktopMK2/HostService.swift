@@ -415,7 +415,7 @@ class HostService {
     private func deleteExecutor(widhtID id: String) -> Bool {
         for pageIndex in userData.pages.indices {
             if let index = userData.pages[pageIndex].executors.firstIndex(where:{$0?.id == id}) {
-                userData.pages[pageIndex].executors.remove(at: index)
+                userData.pages[pageIndex].executors[index] = nil
                 return true
             }
         }

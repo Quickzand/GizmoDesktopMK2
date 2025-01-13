@@ -29,6 +29,8 @@ struct ExecutorModel : Identifiable, Codable, Transferable {
     var backgroundColor : String
     var foregroundColor : String
     var backgroundOpacity : Double
+    
+    
     var iconHidden : Bool
     
     enum CodingKeys: String, CodingKey {
@@ -47,7 +49,6 @@ struct ExecutorModel : Identifiable, Codable, Transferable {
         case backgroundColor
         case foregroundColor
         case backgroundOpacity
-        
       }
     
 
