@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		34561FF92D36F997000273FF /* MediaKeyTap in Frameworks */ = {isa = PBXBuildFile; productRef = 34561FF82D36F997000273FF /* MediaKeyTap */; };
+		34561FFB2D36F9B2000273FF /* MediaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34561FFA2D36F9B2000273FF /* MediaController.swift */; };
 		34AD65092CDE716500FD37D4 /* KeyboardSimulations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34AD65082CDE716500FD37D4 /* KeyboardSimulations.swift */; };
 /* End PBXBuildFile section */
 
@@ -31,6 +33,7 @@
 		340D5BFE2CDD1C1B00F8A710 /* GizmoDesktopMK2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GizmoDesktopMK2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		340D5C0F2CDD1C1C00F8A710 /* GizmoDesktopMK2Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GizmoDesktopMK2Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		340D5C192CDD1C1C00F8A710 /* GizmoDesktopMK2UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GizmoDesktopMK2UITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		34561FFA2D36F9B2000273FF /* MediaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaController.swift; sourceTree = "<group>"; };
 		34AD65082CDE716500FD37D4 /* KeyboardSimulations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KeyboardSimulations.swift; path = GizmoDesktopMK2/KeyboardSimulations.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -70,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34561FF92D36F997000273FF /* MediaKeyTap in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +97,7 @@
 		340D5BF52CDD1C1B00F8A710 = {
 			isa = PBXGroup;
 			children = (
+				34561FFA2D36F9B2000273FF /* MediaController.swift */,
 				34AD65082CDE716500FD37D4 /* KeyboardSimulations.swift */,
 				340D5C002CDD1C1B00F8A710 /* GizmoDesktopMK2 */,
 				340D5C122CDD1C1C00F8A710 /* GizmoDesktopMK2Tests */,
@@ -131,6 +136,7 @@
 			);
 			name = GizmoDesktopMK2;
 			packageProductDependencies = (
+				34561FF82D36F997000273FF /* MediaKeyTap */,
 			);
 			productName = GizmoDesktopMK2;
 			productReference = 340D5BFE2CDD1C1B00F8A710 /* GizmoDesktopMK2.app */;
@@ -214,6 +220,9 @@
 			);
 			mainGroup = 340D5BF52CDD1C1B00F8A710;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				343C39D12D35B40800BE3619 /* XCRemoteSwiftPackageReference "MediaKeyTap" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 340D5BFF2CDD1C1B00F8A710 /* Products */;
 			projectDirPath = "";
@@ -256,6 +265,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				34AD65092CDE716500FD37D4 /* KeyboardSimulations.swift in Sources */,
+				34561FFB2D36F9B2000273FF /* MediaController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -573,6 +583,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		343C39D12D35B40800BE3619 /* XCRemoteSwiftPackageReference "MediaKeyTap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/nhurden/MediaKeyTap/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		34561FF82D36F997000273FF /* MediaKeyTap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 343C39D12D35B40800BE3619 /* XCRemoteSwiftPackageReference "MediaKeyTap" */;
+			productName = MediaKeyTap;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 340D5BF62CDD1C1B00F8A710 /* Project object */;
 }

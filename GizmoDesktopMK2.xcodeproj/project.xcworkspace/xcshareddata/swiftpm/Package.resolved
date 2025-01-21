@@ -1,0 +1,15 @@
+{
+  "originHash" : "6cfadc6cb4b02ece41a8fccef8ae567d0e1e1a6cd1474b6243904dc29d7a838e",
+  "pins" : [
+    {
+      "identity" : "mediakeytap",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nhurden/MediaKeyTap/",
+      "state" : {
+        "revision" : "7d1b8169d228ef6e5ec7db676a348f2f3e50c734",
+        "version" : "2.3.0"
+      }
+    }
+  ],
+  "version" : 3
+}

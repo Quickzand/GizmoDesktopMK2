@@ -8,11 +8,6 @@
 import Foundation
 
 struct UserData : Codable{
-    var actions : [ActionModel] = [] {
-        didSet {
-            save()
-        }
-    }
     var pages : [PageModel] = [PageModel(), PageModel()] {
         didSet {
             save()

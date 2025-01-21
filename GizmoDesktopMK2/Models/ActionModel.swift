@@ -15,7 +15,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
     var modifiers : [ModifierButton : Bool]
     var key : String
     var shortcut : String
-    var coreActionType : CoreActionType
+    var destinationPageId : String
     
     enum CodingKeys: String, CodingKey {
           case id
@@ -24,7 +24,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
         case modifiers
         case key
         case shortcut
-        case coreActionType
+        case destinationPageId
       }
 
       public init(from decoder: Decoder) throws {
@@ -35,17 +35,17 @@ struct ActionModel : Codable, Identifiable, Hashable {
           modifiers = try container.decodeIfPresent([ModifierButton : Bool].self, forKey: .modifiers) ?? [:]
           key = try container.decodeIfPresent(String.self, forKey: .key) ?? ""
           shortcut = try container.decodeIfPresent(String.self, forKey: .shortcut) ?? ""
-          coreActionType = try container.decodeIfPresent(CoreActionType.self, forKey: .coreActionType) ?? .nextSong
+          destinationPageId = try container.decodeIfPresent(String.self, forKey: .destinationPageId) ?? ""
       }
 
-    public init(id: String = UUID().uuidString,name: String = "DefaultID",  type: ActionType = .keybind, modifiers : [ModifierButton : Bool] = [:], key : String = "", shortcut : String = "", coreActionType : CoreActionType = .nextSong) {
+    public init(id: String = UUID().uuidString,name: String = "DefaultID",  type: ActionType = .keybind, modifiers : [ModifierButton : Bool] = [:], key : String = "", shortcut : String = "", destinationPageId : String = "") {
           self.id = id
           self.name = name
         self.type = type
         self.modifiers = modifiers
         self.key = key
         self.shortcut = shortcut
-        self.coreActionType = coreActionType
+        self.destinationPageId = destinationPageId
       }
 }
 
@@ -58,14 +58,14 @@ enum ModifierButton : Codable, Equatable {
 }
 
 
-enum ActionType : Codable {
-    case keybind
+enum ActionCategory : Codable {
+    case system
     case siriShortcut
     case core
     
-    static func < (lhs: ActionType, rhs: ActionType) -> Bool {
+    static func < (lhs: ActionCategory, rhs: ActionCategory) -> Bool {
         switch (lhs, rhs) {
-        case (.keybind, .siriShortcut):
+        case (.system, .siriShortcut):
             return true
         default:
             return false
@@ -74,7 +74,7 @@ enum ActionType : Codable {
     
     var associatedColor: Color {
         switch self {
-        case .keybind:
+        case .system:
             return Color("PrimaryAccentColor")
         case .siriShortcut:
             return Color("TertiaryAccentColor")
@@ -85,8 +85,8 @@ enum ActionType : Codable {
     
     var associatedIcon : String {
         switch self {
-        case .keybind:
-            return "keyboard"
+        case .system:
+            return "desktopcomputer"
         case .siriShortcut:
             return "sparkles"
         case .core:
@@ -95,8 +95,25 @@ enum ActionType : Codable {
     }
 }
 
-enum CoreActionType : Codable {
-    case nextSong
-    case previousSong
-}
 
+enum ActionType : String, Codable, CaseIterable, Identifiable, Hashable {
+    case keybind = "Keybinding"
+    case siriShortcut = "Siri Shortcut"
+    case nextSong = "Next Song"
+    case previousSong = "Previous Song"
+    case goToPage = "Go To Page"
+    
+    var id : Self {self}
+    
+    var category : ActionCategory {
+        switch self {
+        case .keybind:
+            return .system
+        case .siriShortcut:
+            return .siriShortcut
+        case .nextSong, .previousSong, .goToPage:
+            return .core
+        }
+    }
+    
+}

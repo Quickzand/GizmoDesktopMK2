@@ -10,6 +10,14 @@ import Cocoa
 
 import Carbon.HIToolbox
 
+enum MediaKey: UInt16 {
+    case playPause = 0xCD    // Usage for Play/Pause
+    case nextTrack = 0xB5   // Usage for Next Track
+    case previousTrack = 0xB6 // Usage for Previous Track
+    case stop = 0xB7        // Usage for Stop
+}
+
+
 
 
 // Map ModifierButton to CGEventFlags
@@ -104,3 +112,15 @@ func runKeybindAction(_ action: ActionModel) {
 }
 
 
+
+
+func nextSong() {
+    let keyCode = CGKeyCode(101)
+    // Create and post key down event with modifiers
+    let keyDown = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: true)
+    keyDown?.post(tap: .cghidEventTap)
+    
+    // Create and post key up event with modifiers
+    let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false)
+    keyUp?.post(tap: .cghidEventTap)
+}

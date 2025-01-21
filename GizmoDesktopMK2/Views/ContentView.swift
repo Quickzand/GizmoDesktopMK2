@@ -18,18 +18,6 @@ struct ContentView: View {
                     .multilineTextAlignment(.leading)
                     .frame(maxHeight: 200)
                 }
-                DisclosureGroup("Actions:") {
-                    ScrollView {
-                        ForEach(appState.bonjourService.userData.actions) {action in
-                            HStack {
-                                Text(action.name)
-                                Spacer()
-                            }
-                        }
-                    }
-                    .multilineTextAlignment(.leading)
-                    .frame(maxHeight: 200)
-                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

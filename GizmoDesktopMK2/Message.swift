@@ -13,15 +13,8 @@ enum MessageType: String, Codable {
     case pagesList
     case listShortcuts
     case shortcutsList
-    case listActions
-    case actionsList
     case executeAction
     case actionExecuted
-    case createAction
-    case modifyAction
-    case actionUpdated
-    case deleteAction
-    case actionDeleted
     case createExecutor
     case updateExecutor
     case deleteExecutor
@@ -39,8 +32,6 @@ enum MessageType: String, Codable {
     case updateAppInfo
     case AppInfoUpdated
     case error
-    case executeShortcut
-    case shortcutExecuted
 }
 
 
@@ -69,47 +60,21 @@ struct ShortcutsListResponse : Codable {
 
 
 
-struct ListActionsRequest: Codable { }
-
-struct ActionsListResponse : Codable {
-    let actions: [ActionModel]
-}
-
 // 3. ExecuteAction (Client Request)
 struct ExecuteActionRequest: Codable {
-    let actionID: String
-}
-
-struct ExecuteShortcutRequest : Codable {
-    let shortcut: String
+    let executorID: String
+    let actionContextOption : ActionContextOption
 }
 
 // 4. ActionExecuted (Host Response)
 struct ActionExecutedResponse: Codable {
-    let actionID: String
+    let executorId: String
     let success: Bool
     let message: String?
 }
 
 struct ShortcutExecutedResponse : Codable {
     let shortcut: String
-    let success: Bool
-    let message: String?
-}
-
-// 5. CreateAction (Client Request)
-struct CreateActionRequest: Codable {
-    let action : ActionModel
-}
-
-// 6. ModifyAction (Client Request)
-struct ModifyActionRequest: Codable {
-    let action: ActionModel
-}
-
-// 7. ActionUpdated (Host Response)
-struct ActionUpdatedResponse: Codable {
-    let actionID: String
     let success: Bool
     let message: String?
 }
@@ -136,20 +101,12 @@ struct ExecutorDeletedResponse : Codable {
 }
 
 
-struct DeleteActionRequest: Codable {
-    let actionID: String
-}
 
 struct CreateExecutorRequest: Codable {
     let executor: ExecutorModel
     let pageID: String
 }
 
-struct ActionDeletedResponse: Codable {
-    let actionID: String
-    let success: Bool
-    let message: String?
-}
 
 struct SwapExecutorRequest: Codable {
     let executorID: String
@@ -202,7 +159,6 @@ struct AppInfoUpdatedResponse : Codable {
     let success: Bool
     let message: String?
 }
-
 
 
 

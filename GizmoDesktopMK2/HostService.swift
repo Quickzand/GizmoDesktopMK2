@@ -109,27 +109,13 @@ class HostService {
                 handleListPagesRequest(on: connection)
             case .listShortcuts:
                 handleListShortcutsRequest(on: connection)
-            case .listActions:
-                handleListActionsRequest(on: connection)
             case .executeAction:
                 if let request = message.decodePayload(as: ExecuteActionRequest.self) {
                     handleExecuteAction(request, on: connection)
                 }
-            case .createAction:
-                if let request = message.decodePayload(as: CreateActionRequest.self) {
-                    handleCreateAction(request, on: connection)
-                }
             case .createExecutor:
                 if let request = message.decodePayload(as: CreateExecutorRequest.self) {
                     handleCreateExecutor(request, on: connection)
-                }
-            case .modifyAction:
-                if let request = message.decodePayload(as: ModifyActionRequest.self) {
-                    handleModifyAction(request, on: connection)
-                }
-            case .deleteAction:
-                if let request = message.decodePayload(as: DeleteActionRequest.self) {
-                    handleDeleteAction(request, on: connection)
                 }
             case .deleteExecutor:
                 if let request = message.decodePayload(as: DeleteExecutorRequest.self) {
@@ -162,10 +148,6 @@ class HostService {
             case .updateAppInfo:
                 if let request = message.decodePayload(as: UpdateAppInfoRequest.self) {
                     handleUpdateAppInfoRequest(request, on:connection)
-                }
-            case .executeShortcut:
-                if let request = message.decodePayload(as: ExecuteShortcutRequest.self) {
-                    handleExecuteShortcutRequest(request, on:connection)
                 }
             default:
                 sendError(message: "Unsupported message type", on: connection)
@@ -225,31 +207,17 @@ class HostService {
         }
     }
     
-    private func handleListActionsRequest(on connection: NWConnection) {
-        let actionsList = ActionsListResponse(actions: fetchActions())
-        if let message = Message.encodeMessage(type: .actionsList, payload: actionsList) {
-            send(message, on: connection)
-        }
-    }
     
     // Handle ExecuteActionRequest
     private func handleExecuteAction(_ request: ExecuteActionRequest, on connection: NWConnection) {
         // Execute the action based on actionID
-        let success = executeAction(withID: request.actionID)
-        let response = ActionExecutedResponse(actionID: request.actionID, success: success, message: success ? "Action executed successfully" : "Failed to execute action")
+        let success = executeAction(executorId: request.executorID, actionContextOption: request.actionContextOption)
+        let response = ActionExecutedResponse(executorId: request.executorID, success: success, message: success ? "Action executed successfully" : "Failed to execute action")
         if let message = Message.encodeMessage(type: .actionExecuted, payload: response) {
             send(message, on: connection)
         }
     }
     
-    // Handle CreateActionRequest
-    private func handleCreateAction(_ request: CreateActionRequest, on connection: NWConnection) {
-        let success = createAction(action: request.action)
-        let response = ActionUpdatedResponse(actionID: request.action.id, success: success, message: success ? "Action created successfully" : "Failed to create action")
-        if let message = Message.encodeMessage(type: .actionUpdated, payload: response) {
-            send(message, on: connection)
-        }
-    }
     
     private func handleCreateExecutor(_ request: CreateExecutorRequest, on connection: NWConnection) {
         let success = createExecutor(executor: request.executor, pageID: request.pageID)
@@ -259,22 +227,6 @@ class HostService {
         }
     }
     
-    // Handle ModifyActionRequest
-    private func handleModifyAction(_ request: ModifyActionRequest, on connection: NWConnection) {
-        let success = modifyAction(action: request.action)
-        let response = ActionUpdatedResponse(actionID: request.action.id, success: success, message: success ? "Action modified successfully" : "Failed to modify action")
-        if let message = Message.encodeMessage(type: .actionUpdated, payload: response) {
-            send(message, on: connection)
-        }
-    }
-    
-    private func handleDeleteAction(_ request: DeleteActionRequest, on connection: NWConnection) {
-        let success = deleteAction(withID: request.actionID)
-        let response = ActionDeletedResponse(actionID: request.actionID, success: success, message: success ? "Action deleted successfully" : "Failed to delete action")
-        if let message = Message.encodeMessage(type: .actionDeleted, payload: response) {
-            send(message, on: connection)
-        }
-    }
     
     private func handleDeleteExecutor(_ request: DeleteExecutorRequest, on connection: NWConnection) {
         let success = deleteExecutor(widhtID: request.executorID)
@@ -308,9 +260,7 @@ class HostService {
         }
     }
     
-    private func handleExecuteShortcutRequest(_ request: ExecuteShortcutRequest, on connection: NWConnection) {
-        runShortcut(named: request.shortcut)
-    }
+    
     
     // Send a Message to the connection
     func send(_ message: Message, on connection: NWConnection) {
@@ -348,30 +298,29 @@ class HostService {
         return userData.pages
     }
     
-    private func fetchActions() -> [ActionModel] {
-        return userData.actions
-    }
-    
-    private func executeAction(withID id: String) -> Bool {
-        guard let action = userData.actions.first(where: { $0.id == id }) else { return false }
+    private func executeAction(executorId : String, actionContextOption : ActionContextOption) -> Bool {
+        var executor : ExecutorModel?
+        for pageIndex in userData.pages.indices {
+            if let index = userData.pages[pageIndex].executors.firstIndex(where:{$0?.id == executorId}) {
+                executor = userData.pages[pageIndex].executors[index]
+                break;
+            }
+        }
+        guard let executor = executor else {return false}
+        let action = actionContextOption.correspondingActionModel(for: executor)
         print("Executing action \(action)")
         switch action.type {
         case .keybind:
             runKeybindAction(action)
         case .siriShortcut:
             runShortcutAction(action)
-        case .core:
+        default:
             print(action)
         }
         
         return true
     }
-    
-    private func createAction(action: ActionModel) -> Bool {
-        userData.actions.append(action)
-        return true
-    }
-    
+        
     private func createPage(page : PageModel) -> Bool {
         userData.pages.append(page)
         return true
@@ -403,14 +352,7 @@ class HostService {
         }
         return false
     }
-    
-    private func deleteAction(withID id: String) -> Bool {
-        if let index = userData.actions.firstIndex(where: {$0.id == id}) {
-            userData.actions.remove(at: index)
-            return true
-        }
-        return false
-    }
+
     
     private func deleteExecutor(widhtID id: String) -> Bool {
         for pageIndex in userData.pages.indices {
@@ -432,14 +374,7 @@ class HostService {
         return false
     }
     
-    private func modifyAction(action: ActionModel) -> Bool {
-        let changedIndex = userData.actions.firstIndex(where: { $0.id == action.id })
-        if let index = changedIndex {
-            userData.actions[index] = action
-            return true
-        }
-        return false
-    }
+
     
     private func swapExecutor(withID executorID: String, toPage pageID: String, toIndex index: Int) -> Bool {
         // Find the destination page index

@@ -51,6 +51,11 @@ struct PageModel : Identifiable, Codable {
     }
     
     
+    func getExecutor(withId executorId: String) -> ExecutorModel? {
+        return executors.first { $0?.id == executorId } ?? nil
+    }
+    
+    
     //    Adjusts the executors count and makes sure that if the array is not colCount * rowCount length, the rest gets filled with nils
     static func adjustExecutors(page : PageModel) -> PageModel {
         var temp  = page
