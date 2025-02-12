@@ -6,10 +6,12 @@
 //
 
 import Foundation
+import AppKit
 
 struct AppInfoModel : Codable, Hashable {
     let name : String
     let bundleID: String
+    var appIcon : CGImage? = nil
     var associatedPageIDs : [String : Bool]
     
     enum CodingKeys: CodingKey {

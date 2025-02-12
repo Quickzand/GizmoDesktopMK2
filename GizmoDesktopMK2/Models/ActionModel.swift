@@ -16,6 +16,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
     var key : String
     var shortcut : String
     var destinationPageId : String
+    var numericValue : Double
     
     enum CodingKeys: String, CodingKey {
           case id
@@ -25,20 +26,22 @@ struct ActionModel : Codable, Identifiable, Hashable {
         case key
         case shortcut
         case destinationPageId
+        case numericValue
       }
 
       public init(from decoder: Decoder) throws {
           let container = try decoder.container(keyedBy: CodingKeys.self)
           id = try container.decodeIfPresent(String.self, forKey: .id) ?? "DefaultID" // Provide a default or handle missing id
           name = try container.decodeIfPresent(String.self, forKey: .name) ?? "DefaultActionName"
-          type = try container.decodeIfPresent(ActionType.self, forKey: .type) ?? ActionType.keybind
+          type = try container.decodeIfPresent(ActionType.self, forKey: .type) ?? ActionType.none
           modifiers = try container.decodeIfPresent([ModifierButton : Bool].self, forKey: .modifiers) ?? [:]
           key = try container.decodeIfPresent(String.self, forKey: .key) ?? ""
           shortcut = try container.decodeIfPresent(String.self, forKey: .shortcut) ?? ""
           destinationPageId = try container.decodeIfPresent(String.self, forKey: .destinationPageId) ?? ""
+          numericValue = try container.decodeIfPresent(Double.self, forKey: .numericValue) ?? 0
       }
 
-    public init(id: String = UUID().uuidString,name: String = "DefaultID",  type: ActionType = .keybind, modifiers : [ModifierButton : Bool] = [:], key : String = "", shortcut : String = "", destinationPageId : String = "") {
+    public init(id: String = UUID().uuidString,name: String = "DefaultID",  type: ActionType = .none, modifiers : [ModifierButton : Bool] = [:], key : String = "", shortcut : String = "", destinationPageId : String = "") {
           self.id = id
           self.name = name
         self.type = type
@@ -46,15 +49,31 @@ struct ActionModel : Codable, Identifiable, Hashable {
         self.key = key
         self.shortcut = shortcut
         self.destinationPageId = destinationPageId
+        self.numericValue = 0
       }
 }
 
 
-enum ModifierButton : Codable, Equatable {
+enum ModifierButton : Codable, Equatable, Identifiable, Hashable, CaseIterable {
     case shift
     case command
     case control
     case option
+    
+    var id : Self {self}
+    
+    var icon : String {
+        switch self {
+        case .shift:
+            "shift"
+        case .command:
+            "command"
+        case .control:
+            "control"
+        case .option:
+            "option"
+        }
+    }
 }
 
 
@@ -102,18 +121,83 @@ enum ActionType : String, Codable, CaseIterable, Identifiable, Hashable {
     case nextSong = "Next Song"
     case previousSong = "Previous Song"
     case goToPage = "Go To Page"
+    case volumeUp = "Volume Up"
+    case volumeDown = "Volume Down"
+    case setVolume = "Set Volume"
+    case leftClick = "Left Click"
+    case rightClick = "Right Click"
+    case none = "None"
     
     var id : Self {self}
     
     var category : ActionCategory {
         switch self {
-        case .keybind:
+        case .keybind, .volumeUp, .volumeDown, .setVolume, .nextSong, .previousSong,  .leftClick, .rightClick:
             return .system
         case .siriShortcut:
             return .siriShortcut
-        case .nextSong, .previousSong, .goToPage:
+        case .goToPage, .none:
             return .core
         }
     }
     
+    var inputType : ActionValueInputType {
+        switch self {
+        case .keybind:
+            return .Keybind
+        case .volumeDown, .volumeUp, .setVolume:
+            return .Numeric
+        case .goToPage:
+            return .Page
+        default:
+            return .none
+        }
+    }
+    
+    var valueLabel : String {
+        switch self {
+        case .volumeUp, .volumeDown, .setVolume:
+            return "Amount"
+        default:
+            return "Value"
+        
+        }
+    }
+    
+    var numericInputStartingValue : Double {
+        switch self {
+        case .volumeUp, .volumeDown, .setVolume:
+            return 0
+        default:
+            return 0
+        }
+    }
+    
+    var numericInputEndingValue : Double {
+        switch self {
+        case .volumeUp, .volumeDown, .setVolume:
+            return 1
+        default:
+            return 100
+        }
+    }
+    
+    var numericInputStepSize : Double {
+        switch self {
+        case .volumeUp, .volumeDown, .setVolume:
+            return 0.1
+        default:
+            return 1
+        }
+    }
+}
+
+enum ActionValueInputType : Codable, Hashable, Identifiable {
+    case Numeric
+    case String
+    case Keybind
+    case Page
+    case none
+    
+    var id : Self {self}
 }

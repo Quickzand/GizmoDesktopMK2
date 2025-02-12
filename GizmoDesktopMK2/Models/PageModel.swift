@@ -18,6 +18,9 @@ struct PageModel : Identifiable, Codable {
     var nameVisible : Bool
     var backgroundType : PageBackgroundType
     var backgroundColor : String
+    var primaryAccentColor : String
+    var secondaryAccentColor : String
+    var tertiaryAccentColor : String
     
     
     
@@ -29,6 +32,9 @@ struct PageModel : Identifiable, Codable {
         case nameVisible
         case backgroundType
         case backgroundColor
+        case primaryAccentColor
+        case secondaryAccentColor
+        case tertiaryAccentColor
     }
     
     public init(from decoder: Decoder) throws {
@@ -39,6 +45,9 @@ struct PageModel : Identifiable, Codable {
         executors = try container.decodeIfPresent([ExecutorModel?].self, forKey: .executors) ?? []
         backgroundType = try container.decodeIfPresent(PageBackgroundType.self, forKey: .backgroundType) ?? .mesh
         backgroundColor = try container.decodeIfPresent(String.self, forKey: .backgroundColor) ?? "#000000"
+        primaryAccentColor = try container.decodeIfPresent(String.self, forKey: .primaryAccentColor) ?? "#00B06E"
+        secondaryAccentColor = try container.decodeIfPresent(String.self, forKey: .secondaryAccentColor) ?? "#0078AE"
+        tertiaryAccentColor = try container.decodeIfPresent(String.self, forKey: .tertiaryAccentColor) ?? "#9300B3"
     }
     
     public init(name : String = "DefaultName", executors : [ExecutorModel?] = []) {
@@ -48,8 +57,10 @@ struct PageModel : Identifiable, Codable {
         self.nameVisible = true
         self.backgroundType = .mesh
         self.backgroundColor = "#000000"
+        self.primaryAccentColor = "#00B06E"
+        self.secondaryAccentColor = "#0078AE"
+        self.tertiaryAccentColor = "#9300B3"
     }
-    
     
     func getExecutor(withId executorId: String) -> ExecutorModel? {
         return executors.first { $0?.id == executorId } ?? nil

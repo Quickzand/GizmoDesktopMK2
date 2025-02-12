@@ -6,6 +6,9 @@
 //
 import Foundation
 import Network
+import ISSoundAdditions
+import AppKit
+import CoreGraphics
 
 class HostService {
     private var listener: NWListener?
@@ -149,6 +152,10 @@ class HostService {
                 if let request = message.decodePayload(as: UpdateAppInfoRequest.self) {
                     handleUpdateAppInfoRequest(request, on:connection)
                 }
+            case .getAppIcon:
+                if let request = message.decodePayload(as: GetAppIconRequest.self) {
+                    handleGetAppIconRequset(request, on: connection)
+                }
             default:
                 sendError(message: "Unsupported message type", on: connection)
             }
@@ -157,6 +164,26 @@ class HostService {
             print(data)
             sendError(message: "Invalid message format", on: connection)
         }
+    }
+    
+    func cgImageToData(_ cgImage: CGImage, format: NSBitmapImageRep.FileType = .png) -> Data? {
+        let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
+        return bitmapRep.representation(using: format, properties: [:])
+    }
+    
+    private func handleGetAppIconRequset(_ request: GetAppIconRequest, on connection: NWConnection) {
+        if let appInfo = self.userData.rememberedApps.first(where: { $0.bundleID == request.bundleID }) {
+            guard let appIcon = appInfo.appIcon else {
+                return
+            }
+            if let iconData = cgImageToData(appIcon) {
+                let appIconDataResponse = AppIconDataResponse(bundleID: request.bundleID, iconData: iconData)
+                if let message = Message.encodeMessage(type: .appIconData, payload: appIconDataResponse) {
+                    send(message, on:connection)
+                }
+            }
+        }
+        
     }
     
     // Handle ListPagesRequest
@@ -314,6 +341,16 @@ class HostService {
             runKeybindAction(action)
         case .siriShortcut:
             runShortcutAction(action)
+        case .volumeUp:
+            Sound.output.increaseVolume(by: Float(action.numericValue), autoMuteUnmute: true)
+        case .volumeDown:
+            Sound.output.decreaseVolume(by: Float(action.numericValue), autoMuteUnmute: true)
+        case .setVolume:
+            Sound.output.volume = Float(action.numericValue)
+        case .leftClick:
+            performLeftClick()
+        case .rightClick:
+            performRightClick()
         default:
             print(action)
         }
@@ -330,6 +367,7 @@ class HostService {
         for pageIndex in userData.pages.indices {
             if userData.pages[pageIndex].id == page.id {
                 userData.pages[pageIndex] = page
+                print("New pages \(userData.pages)")
                 return true
             }
         }
@@ -420,10 +458,11 @@ class HostService {
         connection.cancel()
     }
     
+ 
+    
     func updateAllInstalledApplications() {
         let fileManager = FileManager.default
 
-        // Common directories where applications are installed
         let applicationDirectories = [
             "/Applications",
             "/System/Applications",
@@ -442,19 +481,54 @@ class HostService {
                     do {
                         let resourceValues = try fileURL.resourceValues(forKeys: [.isDirectoryKey])
                         if resourceValues.isDirectory == true && fileURL.pathExtension == "app" {
-                            // Access the app's bundle
                             if let bundle = Bundle(url: fileURL) {
                                 let appName = bundle.object(forInfoDictionaryKey: "CFBundleName") as? String ?? "Unknown"
                                 let bundleID = bundle.bundleIdentifier ?? "Unknown"
-                                if let appIndex = self.userData.rememberedApps.firstIndex(where: { $0.bundleID == bundleID}) {
-                                    
+
+                                // Try to retrieve the icon name
+                                var iconFileName: String? = bundle.object(forInfoDictionaryKey: "CFBundleIconFile") as? String
+
+                                // Check if `CFBundleIconName` is set (modern approach)
+                                if iconFileName == nil {
+                                    iconFileName = bundle.object(forInfoDictionaryKey: "CFBundleIconName") as? String
                                 }
-                                else {
-                                    let appInfo = AppInfoModel(name: appName, bundleID: bundleID)
-                                    userData.rememberedApps.append(appInfo)
+
+                                var iconURL: URL?
+
+                                if let iconFile = iconFileName {
+                                    // Ensure the file has the correct extension
+                                    if !iconFile.hasSuffix(".icns") {
+                                        iconURL = fileURL.appendingPathComponent("Contents/Resources/\(iconFile).icns")
+                                    } else {
+                                        iconURL = fileURL.appendingPathComponent("Contents/Resources/\(iconFile)")
+                                    }
+                                    
+                                    // Check if file exists
+                                    if let iconURL = iconURL, fileManager.fileExists(atPath: iconURL.path) {
+                                        if let nsImage = NSImage(contentsOf: iconURL), let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
+                                            if let resizedIcon = cgImage.resize(size: CGSize(width: 50, height: 50)) {
+                                                print("Loaded icon for \(appName)")
+                                                
+                                                if let appIndex = self.userData.rememberedApps.firstIndex(where: { $0.bundleID == bundleID }) {
+                                                    self.userData.rememberedApps[appIndex].appIcon = resizedIcon
+                                                } else {
+                                                    var appInfo = AppInfoModel(name: appName, bundleID: bundleID)
+                                                    appInfo.appIcon = resizedIcon
+                                                    userData.rememberedApps.append(appInfo)
+                                                }
+                                            } else {
+                                                print("Failed to resize icon for \(appName)")
+                                            }
+                                        } else {
+                                            print("Failed to load icon for \(appName)")
+                                        }
+                                    } else {
+                                        print("Icon file not found for \(appName) at \(iconURL?.path ?? "Unknown Path")")
+                                    }
+                                } else {
+                                    print("No icon reference found in Info.plist for \(appName)")
                                 }
                             }
-                            // Skip subdirectories within the app bundle
                             enumerator.skipDescendants()
                         }
                     } catch {

@@ -133,4 +133,5 @@ enum InteractionType : Codable {
     case button
     case knob
     case gesture
+    case display 
 }

@@ -124,3 +124,44 @@ func nextSong() {
     let keyUp = CGEvent(keyboardEventSource: nil, virtualKey: keyCode, keyDown: false)
     keyUp?.post(tap: .cghidEventTap)
 }
+
+
+func performLeftClick() {
+    let source = CGEventSource(stateID: .hidSystemState)
+
+    // Get the current mouse position
+    var currentMousePosition = NSEvent.mouseLocation
+
+    // Flip the Y-coordinate to match CGEvent's coordinate system
+    if let screenHeight = NSScreen.main?.frame.height {
+        currentMousePosition.y = screenHeight - currentMousePosition.y
+    }
+
+    // Create mouse down and mouse up events at the corrected position
+    let mouseDown = CGEvent(mouseEventSource: source, mouseType: .leftMouseDown, mouseCursorPosition: currentMousePosition, mouseButton: .left)
+    let mouseUp = CGEvent(mouseEventSource: source, mouseType: .leftMouseUp, mouseCursorPosition: currentMousePosition, mouseButton: .left)
+
+    // Post the events
+    mouseDown?.post(tap: .cghidEventTap)
+    mouseUp?.post(tap: .cghidEventTap)
+}
+
+func performRightClick() {
+    let source = CGEventSource(stateID: .hidSystemState)
+
+    // Get the current mouse position
+    var currentMousePosition = NSEvent.mouseLocation
+
+    // Flip the Y-coordinate to match CGEvent's coordinate system
+    if let screenHeight = NSScreen.main?.frame.height {
+        currentMousePosition.y = screenHeight - currentMousePosition.y
+    }
+
+    // Create mouse down and mouse up events at the corrected position
+    let mouseDown = CGEvent(mouseEventSource: source, mouseType: .rightMouseDown, mouseCursorPosition: currentMousePosition, mouseButton: .left)
+    let mouseUp = CGEvent(mouseEventSource: source, mouseType: .rightMouseUp, mouseCursorPosition: currentMousePosition, mouseButton: .left)
+
+    // Post the events
+    mouseDown?.post(tap: .cghidEventTap)
+    mouseUp?.post(tap: .cghidEventTap)
+}

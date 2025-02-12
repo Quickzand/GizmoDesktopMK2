@@ -1,6 +1,15 @@
 {
-  "originHash" : "6cfadc6cb4b02ece41a8fccef8ae567d0e1e1a6cd1474b6243904dc29d7a838e",
+  "originHash" : "fc9bed2a958dc23ce8d2e710d933dda07267c20022d5bba16096cda972b16f8b",
   "pins" : [
+    {
+      "identity" : "issoundadditions",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/InerziaSoft/ISSoundAdditions.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "4b555f0354e6c280917bae8a598a258efe87ab98"
+      }
+    },
     {
       "identity" : "mediakeytap",
       "kind" : "remoteSourceControl",
