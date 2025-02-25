@@ -165,3 +165,20 @@ func performRightClick() {
     mouseDown?.post(tap: .cghidEventTap)
     mouseUp?.post(tap: .cghidEventTap)
 }
+
+
+func openApp(bundleId: String) {
+    if let appURL = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId) {
+        let configuration = NSWorkspace.OpenConfiguration()
+        NSWorkspace.shared.openApplication(at: appURL, configuration: configuration) { runningApp, error in
+            if let error = error {
+                print("Error opening app: \(error)")
+            } else {
+                print("App opened successfully: \(runningApp?.localizedName ?? "Unknown")")
+            }
+        }
+    } else {
+        print("Failed to find app URL for bundle ID: \(bundleId)")
+    }
+}
+

@@ -351,6 +351,8 @@ class HostService {
             performLeftClick()
         case .rightClick:
             performRightClick()
+        case .openApp:
+            openApp(bundleId: action.openAppBundleId)
         default:
             print(action)
         }
@@ -506,7 +508,7 @@ class HostService {
                                     // Check if file exists
                                     if let iconURL = iconURL, fileManager.fileExists(atPath: iconURL.path) {
                                         if let nsImage = NSImage(contentsOf: iconURL), let cgImage = nsImage.cgImage(forProposedRect: nil, context: nil, hints: nil) {
-                                            if let resizedIcon = cgImage.resize(size: CGSize(width: 50, height: 50)) {
+                                            if let resizedIcon = cgImage.resize(size: CGSize(width: 75, height: 75)) {
                                                 print("Loaded icon for \(appName)")
                                                 
                                                 if let appIndex = self.userData.rememberedApps.firstIndex(where: { $0.bundleID == bundleID }) {

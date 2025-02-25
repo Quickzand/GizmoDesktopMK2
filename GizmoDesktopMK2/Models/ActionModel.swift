@@ -5,6 +5,7 @@
 //  Created by Matthew Sand on 11/7/24.
 //
 
+
 import Foundation
 import SwiftUI
 
@@ -16,6 +17,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
     var key : String
     var shortcut : String
     var destinationPageId : String
+    var openAppBundleId : String
     var numericValue : Double
     
     enum CodingKeys: String, CodingKey {
@@ -26,6 +28,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
         case key
         case shortcut
         case destinationPageId
+        case openAppBundleId
         case numericValue
       }
 
@@ -39,6 +42,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
           shortcut = try container.decodeIfPresent(String.self, forKey: .shortcut) ?? ""
           destinationPageId = try container.decodeIfPresent(String.self, forKey: .destinationPageId) ?? ""
           numericValue = try container.decodeIfPresent(Double.self, forKey: .numericValue) ?? 0
+          openAppBundleId = try container.decodeIfPresent(String.self, forKey: .openAppBundleId) ?? ""
       }
 
     public init(id: String = UUID().uuidString,name: String = "DefaultID",  type: ActionType = .none, modifiers : [ModifierButton : Bool] = [:], key : String = "", shortcut : String = "", destinationPageId : String = "") {
@@ -50,6 +54,7 @@ struct ActionModel : Codable, Identifiable, Hashable {
         self.shortcut = shortcut
         self.destinationPageId = destinationPageId
         self.numericValue = 0
+        self.openAppBundleId = ""
       }
 }
 
@@ -126,13 +131,14 @@ enum ActionType : String, Codable, CaseIterable, Identifiable, Hashable {
     case setVolume = "Set Volume"
     case leftClick = "Left Click"
     case rightClick = "Right Click"
+    case openApp = "Open App"
     case none = "None"
     
     var id : Self {self}
     
     var category : ActionCategory {
         switch self {
-        case .keybind, .volumeUp, .volumeDown, .setVolume, .nextSong, .previousSong,  .leftClick, .rightClick:
+        case .keybind, .volumeUp, .volumeDown, .setVolume, .nextSong, .previousSong,  .leftClick, .rightClick, .openApp:
             return .system
         case .siriShortcut:
             return .siriShortcut
@@ -149,6 +155,8 @@ enum ActionType : String, Codable, CaseIterable, Identifiable, Hashable {
             return .Numeric
         case .goToPage:
             return .Page
+        case .openApp:
+            return .App
         default:
             return .none
         }
@@ -158,6 +166,8 @@ enum ActionType : String, Codable, CaseIterable, Identifiable, Hashable {
         switch self {
         case .volumeUp, .volumeDown, .setVolume:
             return "Amount"
+        case .openApp:
+            return "App"
         default:
             return "Value"
         
@@ -197,6 +207,7 @@ enum ActionValueInputType : Codable, Hashable, Identifiable {
     case String
     case Keybind
     case Page
+    case App
     case none
     
     var id : Self {self}
